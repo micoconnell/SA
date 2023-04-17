@@ -37,39 +37,30 @@ def main(name: str) -> str:
     dfName1  = blob_client1.download_blob()  
     dfName1 = pd.read_csv(dfName1)
 
-
     dfName2  = blob_client2.download_blob()  
     dfName2 = pd.read_csv(dfName2)
 
     dfName3  = blob_client3.download_blob()  
     dfName3 = pd.read_csv(dfName3)
 
-    
     dfName4  = blob_client4.download_blob()  
     dfName4 = pd.read_csv(dfName4)
 
     dfName5  = blob_client5.download_blob()  
     dfName5 = pd.read_csv(dfName5)
-
-    
     
     dfName6  = blob_client6.download_blob()  
     dfName6 = pd.read_csv(dfName6)
 
-    
-    
     dfName7  = blob_client7.download_blob()  
     dfName7 = pd.read_csv(dfName7)
 
-    
     dfName8  = blob_client8.download_blob()  
     dfName8 = pd.read_csv(dfName8)
-    
     
     dfName9  = blob_client9.download_blob()  
     dfName9 = pd.read_csv(dfName9)
   
-    
     column_names = [
         ["Date","CoalDCR","HydroDCR","GasDCR","EnergyDCR","SolarDCR"],
         ["Date","WindDCR","DualFuelDCR","OtherDCR","Dispatched Contingency ReserveGen"],
@@ -80,7 +71,6 @@ def main(name: str) -> str:
         ["Date",'HydroGen','OtherGen','StorageGen','WindGen'],
         ["Date",'NetInterchange','NetCogen','NetCombinedCycle','NetGasFiredSteam','NetSimpleCycle'],
         ["Date",'LSSiArmed','LSSiOffered'] ]
-    
     
     dfName1.columns = column_names[0]
     dfName2.columns = column_names[1]
@@ -120,7 +110,7 @@ def main(name: str) -> str:
         # If the first row still has NaN values, use backward fill (bfill) to fill them
         if df_filled.iloc[0].isnull().any():
             df_filled = df_filled.bfill()
-
+        # If the data is wrong, it goes wrong here.    
         # Resample to hourly frequency and compute the average
         df_hourly = df_filled.resample('5Min').mean()
         df_hourly = df_hourly[df_hourly.index <= pd.to_datetime(last_hour)]
@@ -129,9 +119,6 @@ def main(name: str) -> str:
         print(df_hourly)
         return df_hourly
 
-    
-    
-    
     dfName1 = process_dataframe(dfName1)
     dfName2 = process_dataframe(dfName2)
     dfName3 = process_dataframe(dfName3)
@@ -143,7 +130,10 @@ def main(name: str) -> str:
     dfName9 = process_dataframe(dfName9)  
 
     merged_df = pd.concat([dfName1, dfName2, dfName3,dfName4,dfName5,dfName6,dfName7,dfName8,dfName9], axis=1)
+    merged_df.replace('', np.nan, inplace=True)
+    merged_df = merged_df.fillna(method='ffill')
     merged_df = merged_df.to_csv()
+
     blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=sevendaypremium;AccountKey=YeFdLE5sLLsVceijHjRczp3GgZ70AtN4pHmTDlL73a98Om5SmWVL3WIA9xWo4hQ84u3FCirCqM3P+AStlvSSrQ==;EndpointSuffix=core.windows.net")
     container_client = blob_service_client.get_container_client("supplycushionmetrics")
     blob_client = container_client.get_blob_client("supplycurrent.csv")

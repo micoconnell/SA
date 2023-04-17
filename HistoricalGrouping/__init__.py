@@ -34,39 +34,34 @@ def main(name: str) -> str:
 
     dfName1  = blob_client1.download_blob()  
     dfName1 = pd.read_csv(dfName1)
-    print(dfName1)
 
     dfName2  = blob_client2.download_blob()  
     dfName2 = pd.read_csv(dfName2)
-    print(dfName2)
+
     dfName3  = blob_client3.download_blob()  
     dfName3 = pd.read_csv(dfName3)
-    print(dfName3)
+
     
     dfName4  = blob_client4.download_blob()  
     dfName4 = pd.read_csv(dfName4)
-    print(dfName4)
+
     dfName5  = blob_client5.download_blob()  
     dfName5 = pd.read_csv(dfName5)
-    print(dfName5)
-    
-    
+
     dfName6  = blob_client6.download_blob()  
     dfName6 = pd.read_csv(dfName6)
-    print(dfName6)
-    
-    
+
     dfName7  = blob_client7.download_blob()  
     dfName7 = pd.read_csv(dfName7)
-    print(dfName7)
+
     
     dfName8  = blob_client8.download_blob()  
     dfName8 = pd.read_csv(dfName8)
-    print(dfName8)
+
     
     dfName9  = blob_client9.download_blob()  
     dfName9 = pd.read_csv(dfName9)
-    print(dfName9)
+
     
     column_names = [
         ["Date","CoalDCR","HydroDCR","GasDCR","EnergyDCR","SolarDCR"],
@@ -81,7 +76,6 @@ def main(name: str) -> str:
     
     
     dfName1.columns = column_names[0]
-    print(dfName1)
     dfName2.columns = column_names[1]
     dfName3.columns = column_names[2]
     dfName4.columns = column_names[3]
