@@ -32,7 +32,7 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
         current_db_results.append(current_db_result)
 
         # Add a 1 second wait between each call to HistoricalDBPROD
-        yield context.create_timer(context.current_utc_datetime + datetime.timedelta(seconds=2))
+        yield context.create_timer(context.current_utc_datetime + datetime.timedelta(seconds=4))
 
     Grouping_Task = context.call_activity('CurrentGrouping', "DONOW")
     Grouping_Results = yield context.task_all([Grouping_Task])

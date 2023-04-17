@@ -5,7 +5,7 @@ import azure.functions as func
 import azure.durable_functions as df
 
 def orchestrator_function(context: df.DurableOrchestrationContext):
-    timeout = context.current_utc_datetime + datetime.timedelta(minutes=1)
+    timeout = context.current_utc_datetime + datetime.timedelta(minutes=1.5)
     column_apis = [
         [80, 79, 78, 322680, 322669, "Historical1.csv"],
         [293674, 322687, 293675, 228, "Historical2.csv"],
@@ -32,7 +32,7 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
         historical_db_results.append(historical_db_result)
 
         # Add a 1 second wait between each call to HistoricalDBPROD
-        yield context.create_timer(context.current_utc_datetime + datetime.timedelta(seconds=2))
+        yield context.create_timer(context.current_utc_datetime + datetime.timedelta(seconds=4))
 
     Grouping_Task = context.call_activity('HistoricalGrouping', "DONOW")
     Grouping_Results = yield context.task_all([Grouping_Task])

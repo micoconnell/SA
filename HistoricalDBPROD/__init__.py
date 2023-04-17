@@ -10,7 +10,7 @@ from azure.core.exceptions import ResourceNotFoundError
 import pandas as pd
 import io
 import datetime
-
+import pytz
 
 def main(historicaldata):
     last_item = historicaldata.pop()
@@ -28,12 +28,14 @@ def main(historicaldata):
             self.close()
 
     def get_last_hour_date_str():
-        last_hour = datetime.datetime.now() - datetime.timedelta(hours=1)
+        calgary_tz = pytz.timezone('America/Edmonton')
+        last_hour = datetime.datetime.now(calgary_tz) - datetime.timedelta(hours=1)
         last_hour = last_hour.replace(minute=0, second=0, microsecond=0)  # Round down to the nearest hour
         return last_hour.strftime("%m/%d/%Y %H:%M:%S")
 
     def get_this_hour_date_str():
-        this_hour = datetime.datetime.now()
+        calgary_tz = pytz.timezone('America/Edmonton')
+        this_hour = datetime.datetime.now(calgary_tz)
         this_hour = this_hour.replace(minute=0, second=0, microsecond=0)  # Round down to the nearest hour
         return this_hour.strftime("%m/%d/%Y %H:%M:%S")
 
