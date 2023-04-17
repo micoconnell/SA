@@ -15,6 +15,7 @@ from typing import BinaryIO
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 import pytz
+import numpy as np
 
 
 
@@ -35,7 +36,7 @@ def main(name: str) -> str:
 
     dfName1  = blob_client1.download_blob()  
     dfName1 = pd.read_csv(dfName1)
-    
+
 
     dfName2  = blob_client2.download_blob()  
     dfName2 = pd.read_csv(dfName2)
@@ -103,8 +104,8 @@ def main(name: str) -> str:
     def process_dataframe(df):
         def get_this_hour_date_str():
             calgary_tz = pytz.timezone('America/Edmonton')
-            this_hour = datetime.datetime.now(calgary_tz)
-            this_hour = this_hour.replace(hour = 0, minute=0, second=0, microsecond=0)  # Round down to the nearest hour
+            this_hour = datetime.now(calgary_tz)
+            this_hour = this_hour.replace(second=0, microsecond=0)  # Round down to the nearest hour
             return this_hour.strftime("%m/%d/%Y %H:%M:%S")
         last_hour = get_this_hour_date_str()
         
@@ -112,7 +113,7 @@ def main(name: str) -> str:
         # Ensure the index is a datetime index
         #df = df.set_index(['Date'],drop=True)
         df.index = pd.to_datetime(df.index)
-
+        df.replace('', np.nan, inplace=True)
         # Forward fill NaN values in the columns
         df_filled = df.fillna(method='ffill')
 
@@ -122,7 +123,10 @@ def main(name: str) -> str:
 
         # Resample to hourly frequency and compute the average
         df_hourly = df_filled.resample('5Min').mean()
-        df_hourly = df_hourly[df_hourly.index >= pd.to_datetime(last_hour)]
+        df_hourly = df_hourly[df_hourly.index <= pd.to_datetime(last_hour)]
+        df_hourly.replace('', np.nan, inplace=True)
+        df_hourly = df_hourly.fillna(method='ffill')
+        print(df_hourly)
         return df_hourly
 
     
