@@ -15,7 +15,9 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
         [226, 225, 86, 85, 322684, "Historical6.csv"],
         [87, 23695, 322677, 23694, "Historical7.csv"],
         [224, 350464, 350466, 350465, 350463, "Historical8.csv"],
-        [337425, 337426, "Historical9.csv"]
+        [337425, 337426,2662, "Historical9.csv"],
+        [118369, 118370,118371,322686, "Historical10.csv"],
+        [322668,147264,322679,118372, "Historical11.csv"]
     ]
 
     historical_db_results = []

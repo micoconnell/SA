@@ -33,6 +33,8 @@ def main(name: str) -> str:
     blob_client7 = container_client.get_blob_client("Current7.csv")
     blob_client8 = container_client.get_blob_client("Current8.csv")
     blob_client9 = container_client.get_blob_client("Current9.csv")
+    blob_client10 = container_client.get_blob_client("Current10.csv")
+    blob_client11 = container_client.get_blob_client("Current11.csv")
 
     dfName1  = blob_client1.download_blob()  
     dfName1 = pd.read_csv(dfName1)
@@ -61,6 +63,12 @@ def main(name: str) -> str:
     dfName9  = blob_client9.download_blob()  
     dfName9 = pd.read_csv(dfName9)
   
+    dfName10  = blob_client10.download_blob()  
+    dfName10 = pd.read_csv(dfName10)
+    
+    dfName11  = blob_client11.download_blob()  
+    dfName11 = pd.read_csv(dfName11)  
+  
     column_names = [
         ["Date","CoalDCR","HydroDCR","GasDCR","EnergyDCR","SolarDCR"],
         ["Date","WindDCR","DualFuelDCR","OtherDCR","Dispatched Contingency ReserveGen"],
@@ -70,7 +78,10 @@ def main(name: str) -> str:
         ["Date",'ContingencyRequired','AIL','CoalGen','GasGen','DualGen'],
         ["Date",'HydroGen','OtherGen','StorageGen','WindGen'],
         ["Date",'NetInterchange','NetCogen','NetCombinedCycle','NetGasFiredSteam','NetSimpleCycle'],
-        ["Date",'LSSiArmed','LSSiOffered'] ]
+        ["Date",'LSSiArmed','LSSiOffered','SMP','Volume'],
+        ["Date",'CoalAval','GasAval','HydroAval','DualAval'], 
+        ["Date",'WindAval','SolarAval','StorageAval','OtherAval'] 
+        ]
     
     dfName1.columns = column_names[0]
     dfName2.columns = column_names[1]
@@ -81,6 +92,8 @@ def main(name: str) -> str:
     dfName7.columns = column_names[6]
     dfName8.columns = column_names[7]
     dfName9.columns = column_names[8]
+    dfName10.columns = column_names[9]
+    dfName11.columns = column_names[10]
     dfName1 = dfName1.set_index(['Date'],drop=True)
     dfName2 = dfName2.set_index(['Date'],drop=True)
     dfName3 = dfName3.set_index(['Date'],drop=True)
@@ -90,7 +103,8 @@ def main(name: str) -> str:
     dfName7 = dfName7.set_index(['Date'],drop=True)
     dfName8 = dfName8.set_index(['Date'],drop=True)
     dfName9 = dfName9.set_index(['Date'],drop=True)
-
+    dfName10 = dfName10.set_index(['Date'],drop=True)
+    dfName11 = dfName10.set_index(['Date'],drop=True)
     def process_dataframe(df):
         def get_this_hour_date_str():
             calgary_tz = pytz.timezone('America/Edmonton')
@@ -128,10 +142,34 @@ def main(name: str) -> str:
     dfName7 = process_dataframe(dfName7)  
     dfName8 = process_dataframe(dfName8)
     dfName9 = process_dataframe(dfName9)  
+    dfName10 = process_dataframe(dfName10)  
+    dfName11 = process_dataframe(dfName11)  
+    merged_df = pd.concat([dfName1, dfName2, dfName3,dfName4,dfName5,dfName6,dfName7,dfName8,dfName9,dfName10,dfName11], axis=1)
 
-    merged_df = pd.concat([dfName1, dfName2, dfName3,dfName4,dfName5,dfName6,dfName7,dfName8,dfName9], axis=1)
+    
+    ListofStatics = [820,10894,466,894,3618,1165,90,444]
+    merged_df['CoalAval'] = merged_df['CoalAval']/100 * 820
+    merged_df['GasAval'] = merged_df['GasAval']/100 * 10894
+    merged_df['HydroAval'] = merged_df['HydroAval']/100 * 466
+    merged_df['DualAval'] = merged_df['DualAval']/100 * 894
+    merged_df['SolarAval'] = merged_df['SolarAval']/100 * 3618
+    merged_df['WindAval'] = merged_df['WindAval']/100 * 1165
+    merged_df['StorageAval'] = merged_df['StorageAval']/100 * 90
+    merged_df['OtherAval'] = merged_df['OtherAval']/100 * 444
+
+    merged_df['CoalMC'] = ListofStatics[0]
+    merged_df['GasMC'] = ListofStatics[1]
+    merged_df['DualMC'] = ListofStatics[2]
+    merged_df['HydroMC'] = ListofStatics[3]
+    merged_df['SolarMC'] = ListofStatics[5]
+    merged_df['WindMC'] = ListofStatics[4]
+    merged_df['StorageMC'] = ListofStatics[6]
+    merged_df['OtherMC'] = ListofStatics[7]
+    
     merged_df.replace('', np.nan, inplace=True)
     merged_df = merged_df.fillna(method='ffill')
+    numerical_columns = merged_df.select_dtypes(include=['number']).columns
+    merged_df[numerical_columns] = merged_df[numerical_columns].round(0)
     merged_df = merged_df.to_csv()
 
     blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=sevendaypremium;AccountKey=YeFdLE5sLLsVceijHjRczp3GgZ70AtN4pHmTDlL73a98Om5SmWVL3WIA9xWo4hQ84u3FCirCqM3P+AStlvSSrQ==;EndpointSuffix=core.windows.net")
